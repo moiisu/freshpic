@@ -25,6 +25,7 @@ Make set DENO_DEPLOY_TOKEN in your environment
 Then deploy project:
 
 ```
+deno task build
 deployctl deploy --project=your-project-name
 ```
 

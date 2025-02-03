@@ -39,7 +39,7 @@
   "deploy": {
     "exclude": [
       "**/node_modules",
-      "**/images",
+      "./images",
       "**/test"
     ],
     "include": [],
