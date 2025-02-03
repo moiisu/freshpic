@@ -7,19 +7,27 @@ export const handler = async (
   req: Request,
   _ctx: FreshContext,
 ): Promise<Response> => {
-  const form = await req.formData();
-  const file = form.get("file") as File;
-  const readableStream = await file.arrayBuffer()
-  const fileHashBuffer = await crypto.subtle.digest("MD5",readableStream);
-  const fileHash = encodeHex(fileHashBuffer);
+  try {
+    const form = await req.formData();
+    const file = form.get("file") as File;
+    const readableStream = await file.arrayBuffer();
+    const fileHashBuffer = await crypto.subtle.digest("MD5", readableStream);
+    const fileHash = encodeHex(fileHashBuffer);
 
-  const oldImageMeta = await getImageMeta(fileHash)
-  if (oldImageMeta !== null) {
-    return new Response(oldImageMeta.url)
+    const oldImageMeta = await getImageMeta(fileHash);
+    if (oldImageMeta !== null) {
+      return Response.json({
+        url: oldImageMeta.url,
+        name: oldImageMeta.name
+      })
+    }
+
+    const url = await setImage(file, fileHash);
+    return Response.json({
+      url: url,
+      name: file.name
+    })
+  } catch (_e) {
+    return new Response("error")
   }
-  
-
-  const url = await setImage(file,fileHash)
-
-  return new Response(url);
 };

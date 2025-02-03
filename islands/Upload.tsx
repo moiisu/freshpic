@@ -38,11 +38,12 @@ export default function Upload() {
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
+          const {url,name} = JSON.parse(xhr.responseText)
           uploadResult.value = {
             success: true,
-            url: xhr.responseText,
+            url: url,
             message: "文件上传成功",
-            name: selectedFile.value?.name
+            name: name
           };
           isUploading.value = false;
           uploadProgress.value = 100;

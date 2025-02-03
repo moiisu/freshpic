@@ -7,18 +7,27 @@ export function handler(
 ) {
   const cookies = getCookies(req.headers);
   const url = new URL(req.url);
-  const token = Deno.env.get("TOKEN")
-  if ((url.pathname === "/" || url.pathname.includes("/api") ) && cookies.token !== token) {
-      return new Response("", {
-        status: 307,
-        headers: { Location: "/login" },
+  const token = Deno.env.get("TOKEN");
+
+  if (
+    (url.pathname === "/" || url.pathname.includes("/api")) &&
+    cookies.token !== token
+  ) {
+    if (req.method == "POST") {
+      return new Response("Auth error", {
+        status: 401,
       });
+    }
+    return new Response("", {
+      status: 307,
+      headers: { Location: "/login" },
+    });
   }
   if (url.pathname === "/login" && cookies.token === token) {
     return new Response("", {
-        status: 307,
-        headers: { Location: "/" },
-      });
+      status: 307,
+      headers: { Location: "/" },
+    });
   }
   return ctx.next();
 }

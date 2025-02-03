@@ -4,6 +4,7 @@ export interface ImageMeta {
     type: string;
     size: number;
     createdAt: Date;
+    name: string;
 }
 
 export interface ImageSlice {

@@ -15,6 +15,7 @@ export const setImage = async (data: File, md5: string) => {
     size: data.size,
     type: data.type,
     createdAt: new Date(),
+    name: data.name
   };
   await kv.set(["image", "meta", id], imageMeta);
 
