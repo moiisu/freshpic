@@ -94,6 +94,27 @@ export default function Upload() {
     }
   };
 
+  const URLparse = [
+    {
+      tabname: "URL",
+      parse: (url?: string, _name?: string): string => {
+        return `${url}`;
+      },
+    },
+    {
+      tabname: "Markdown",
+      parse: (url?: string, name?: string): string => {
+        return `![${name}](${url})`;
+      },
+    },
+    {
+      tabname: "HTML",
+      parse: (url?: string, name?: string): string => {
+        return `<img src="${url}" alt="${name}" title="${name}" />`;
+      },
+    },
+  ];
+
   return (
     <main className="min-h-screen p-8 flex flex-col items-center">
       <div className="w-full max-w-2xl">
@@ -140,12 +161,21 @@ export default function Upload() {
         {preview.value && (
           <div className="mt-6">
             <h2 className="text-xl font-semibold mb-4">预览</h2>
-            <div className="border rounded-lg overflow-hidden">
+            <div className="relative border rounded-lg overflow-hidden">
               <img
                 src={preview.value}
                 alt="预览图片"
                 className="w-full h-auto object-contain max-h-96"
               />
+              <div
+                className={`${uploadResult.value ?? "hidden"} badge ${
+                  uploadResult.value?.success ? "badge-success" : "badge-error"
+                } gap-2 absolute bottom-0 left-0 right-0 w-full a-[2] rounded-lg`}
+              >
+                {uploadResult.value?.success
+                  ? "上传成功"
+                  : `上传失败:${uploadResult.value?.message}`}
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -170,44 +200,58 @@ export default function Upload() {
                 </div>
               )}
             </div>
-            {uploadResult.value && (uploadResult.value.success
-              ? (
-                <div className="mt-4 p-4 rounded-md flex text-green-700 items-center justify-between">
-                  <div className="max-w-[200px] sm:max-w-[100%]">
-                    <p className="mb-1">
-                      {`${uploadResult.value.name}:${uploadResult.value.message}`}
-                    </p>
-                    <div className="flex items-center">
-                      <span className="mr-2">URL:</span>
-                      <a
-                        href={uploadResult.value.url}
-                        target="_blank"
-                        className="text-blue-500 truncate max-w-[200px] sm:max-w-max"
+            {uploadResult.value?.success && (
+              <div role="tablist" className="tabs tabs-lifted mt-6">
+                {URLparse.map((e) => (
+                  <>
+                    <input
+                      type="radio"
+                      name="my_tabs_1"
+                      role="tab"
+                      className="tab"
+                      aria-label={e.tabname}
+                      defaultChecked={e.tabname === "URL"}
+                    />
+                    <div
+                      role="tabpanel"
+                      className="tab-content p-3 relative rounded-lg font-mono overflow-x-auto"
+                    >
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            e.parse(
+                              uploadResult.value?.url,
+                              uploadResult.value?.name,
+                            ),
+                          );
+                        }}
+                        className="absolute right-2 top-2 rounded   hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                       >
-                        {uploadResult.value.url}
-                      </a>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-gray-300"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </button>
+                      <pre className="overflow-x-auto text-sm">
+                        <code >
+                          {e.parse(uploadResult.value?.url, uploadResult.value?.name)}
+                        </code>
+                      </pre>
                     </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (uploadResult.value?.url) {
-                        navigator.clipboard.writeText(uploadResult.value.url);
-                        alert("URL 已复制到剪贴板");
-                      }
-                    }}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg sm:text-base text-sm"
-                  >
-                    复制
-                  </button>
-                </div>
-              )
-              : (
-                <div className="mt-4 p-4 rounded-md text-red-700 text-center">
-                  <a className="mr-2 ">
-                    {`上传失败！${uploadResult.value?.message}`}
-                  </a>
-                </div>
-              ))}
+                  </>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
