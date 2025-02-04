@@ -15,6 +15,7 @@ export default function Upload() {
     const url = URL.createObjectURL(file);
     preview.value = url;
     selectedFile.value = file;
+    uploadResult.value = undefined;
   };
 
   const handleUpload = () => {

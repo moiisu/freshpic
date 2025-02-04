@@ -1,7 +1,6 @@
 # Freshpic
 基于Fresh,Deno-kv,Deno-deploy实现免费图床。
 ![](./images/home.png)
-
 ## 上传图片
 ```bash
 curl -X POST https://your-domain.com/upload \
