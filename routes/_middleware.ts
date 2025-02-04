@@ -14,7 +14,7 @@ export function handler(
     cookies.token !== token
   ) {
     if (req.method == "POST") {
-      return new Response("Auth error", {
+      return new Response("Auth error, Please relogin!", {
         status: 401,
       });
     }

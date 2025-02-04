@@ -6,7 +6,8 @@ const dragActive = signal(false);
 const uploadProgress = signal(0);
 const isUploading = signal(false);
 const uploadResult = signal<
-  { success: boolean; url?: string; message?: string; name?: string } | undefined
+  | { success: boolean; url?: string; message?: string; name?: string }
+  | undefined
 >(undefined);
 
 export default function Upload() {
@@ -19,47 +20,48 @@ export default function Upload() {
   const handleUpload = () => {
     if (!selectedFile.value) return;
 
-    try {
-      isUploading.value = true;
-      uploadProgress.value = 0;
+    isUploading.value = true;
+    uploadProgress.value = 0;
 
-      const formData = new FormData();
-      formData.append("file", selectedFile.value);
+    const formData = new FormData();
+    formData.append("file", selectedFile.value);
 
-      const xhr = new XMLHttpRequest();
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          uploadProgress.value = progress;
-        }
-      };
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        uploadProgress.value = progress;
+      }
+    };
 
-      xhr.open("POST", "/api/upload");
+    xhr.open("POST", "/api/upload");
 
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          const {url,name} = JSON.parse(xhr.responseText)
-          uploadResult.value = {
-            success: true,
-            url: url,
-            message: "文件上传成功",
-            name: name
-          };
-          isUploading.value = false;
-          uploadProgress.value = 100;
-        } else {
-          throw new Error("上传失败");
-        }
-      };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const { url, name } = JSON.parse(xhr.responseText);
+        uploadResult.value = {
+          success: true,
+          url: url,
+          message: "文件上传成功",
+          name: name,
+        };
+        isUploading.value = false;
+        uploadProgress.value = 100;
+      } else if (xhr.status == 401) {
+        uploadResult.value = {
+          success: false,
+          message: xhr.responseText,
+        };
+        isUploading.value = false;
+        uploadProgress.value = 0;
+      }
+    };
 
-      xhr.onerror = () => {
-        throw new Error("网络错误");
-      };
+    xhr.onerror = () => {
+      throw new Error("网络错误");
+    };
 
-      xhr.send(formData);
-    } catch (error) {
-      console.error("上传错误:", error);
-    }
+    xhr.send(formData);
   };
 
   // 拖拽处理
@@ -96,7 +98,6 @@ export default function Upload() {
     <main className="min-h-screen p-8 flex flex-col items-center">
       <div className="w-full max-w-2xl">
         <h1 className="text-3xl font-bold mb-8">Freshpic</h1>
-
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center mb-4 transition-all duration-200
             ${
@@ -169,28 +170,44 @@ export default function Upload() {
                 </div>
               )}
             </div>
-            {uploadResult.value?.success && (
-              <div className="mt-4 p-4 rounded-md text-green-700 flex items-center justify-between">
-                <div className="max-w-[200px] sm:max-w-[100%]">
-                  <p className="mb-1">{`${uploadResult.value.name}:${uploadResult.value.message}`}</p>
-                  <div className="flex items-center">
-                    <span className="mr-2">URL:</span>
-                    <a href={uploadResult.value.url} target="_blank" className="text-blue-500 truncate max-w-[200px]">{uploadResult.value.url}</a>
+            {uploadResult.value && (uploadResult.value.success
+              ? (
+                <div className="mt-4 p-4 rounded-md flex text-green-700 items-center justify-between">
+                  <div className="max-w-[200px] sm:max-w-[100%]">
+                    <p className="mb-1">
+                      {`${uploadResult.value.name}:${uploadResult.value.message}`}
+                    </p>
+                    <div className="flex items-center">
+                      <span className="mr-2">URL:</span>
+                      <a
+                        href={uploadResult.value.url}
+                        target="_blank"
+                        className="text-blue-500 truncate max-w-[200px] sm:max-w-max"
+                      >
+                        {uploadResult.value.url}
+                      </a>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      if (uploadResult.value?.url) {
+                        navigator.clipboard.writeText(uploadResult.value.url);
+                        alert("URL 已复制到剪贴板");
+                      }
+                    }}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg sm:text-base text-sm"
+                  >
+                    复制
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    if (uploadResult.value?.url) {
-                      navigator.clipboard.writeText(uploadResult.value.url);
-                      alert("URL 已复制到剪贴板");
-                    }
-                  }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg sm:text-base text-sm"
-                >
-                  复制
-                </button>
-              </div>
-            )}
+              )
+              : (
+                <div className="mt-4 p-4 rounded-md text-red-700 text-center">
+                  <a className="mr-2 ">
+                    {`上传失败！${uploadResult.value?.message}`}
+                  </a>
+                </div>
+              ))}
           </div>
         )}
       </div>
