@@ -10,6 +10,8 @@ const uploadResult = signal<
   | undefined
 >(undefined);
 
+const copy = signal("copy")
+
 export default function Upload() {
   const handleFile = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -217,32 +219,38 @@ export default function Upload() {
                       role="tabpanel"
                       className="tab-content p-3 relative rounded-lg font-mono overflow-x-auto"
                     >
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            e.parse(
-                              uploadResult.value?.url,
-                              uploadResult.value?.name,
-                            ),
-                          );
-                        }}
-                        className="absolute right-2 top-2 rounded   hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-300"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                      <div className=" absolute right-2 top-2 rounded">
+                      <div className="tooltip tooltip-left tooltip-accent " data-tip={copy} onMouseOver={()=> copy.value = "copy"}>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              e.parse(
+                                uploadResult.value?.url,
+                                uploadResult.value?.name,
+                              ),
+                            );
+                            copy.value = "copied"
+                          }}
+                          className="hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-300"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                      </div>
+                     
                       <pre className="overflow-x-auto text-sm">
                         <code >
                           {e.parse(uploadResult.value?.url, uploadResult.value?.name)}
